@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Succulents Box — Caption Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f1ec;
+      color: #2c2c2c;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 540px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .logo-icon {
+      font-size: 28px;
+    }
+
+    .logo-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: #4a7c59;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    input[type="password"],
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #e0dbd3;
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+      background: #faf9f7;
+      color: #2c2c2c;
+      transition: border-color 0.2s;
+      outline: none;
+      resize: none;
+    }
+
+    input[type="password"]:focus,
+    textarea:focus {
+      border-color: #4a7c59;
+      background: #fff;
+    }
+
+    textarea {
+      height: 110px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      background: #4a7c59;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .btn:hover { background: #3d6b4a; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .error {
+      color: #c0392b;
+      font-size: 13px;
+      margin-top: 10px;
+      min-height: 18px;
+    }
+
+    .output-section {
+      margin-top: 28px;
+      display: none;
+    }
+
+    .output-block {
+      background: #f4f1ec;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .output-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #4a7c59;
+      margin-bottom: 8px;
+    }
+
+    .output-text {
+      font-size: 15px;
+      line-height: 1.55;
+      color: #2c2c2c;
+      word-break: break-word;
+    }
+
+    .hashtags-text {
+      font-size: 14px;
+      color: #4a7c59;
+      font-weight: 500;
+      line-height: 1.7;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #fff;
+      border: 1.5px solid #e0dbd3;
+      border-radius: 7px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .copy-btn:hover { border-color: #4a7c59; color: #4a7c59; }
+    .copy-btn.copied { background: #4a7c59; color: #fff; border-color: #4a7c59; }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2.5px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .divider {
+      height: 1px;
+      background: #ede9e3;
+      margin: 24px 0;
+    }
+
+    #pin-screen { display: block; }
+    #main-screen { display: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <div class="logo">
+      <span class="logo-icon">🌵</span>
+      <span class="logo-text">Succulents Box</span>
+    </div>
+
+    <!-- PIN SCREEN -->
+    <div id="pin-screen">
+      <h1>Caption Generator</h1>
+      <p class="subtitle">Enter your PIN to continue.</p>
+      <label for="pin-input">Password</label>
+      <input type="password" id="pin-input" placeholder="Enter password" maxlength="32"
+        onkeydown="if(event.key==='Enter') submitPin()" autocomplete="current-password" />
+      <button class="btn" onclick="submitPin()">Continue</button>
+      <p class="error" id="pin-error"></p>
+    </div>
+
+    <!-- MAIN SCREEN -->
+    <div id="main-screen">
+      <h1>Caption Generator</h1>
+      <p class="subtitle">Based on your live 2026 TikTok data.</p>
+
+      <label for="description">Video name or description</label>
+      <textarea id="description"
+        placeholder="e.g. Haworthia propagation — how to split a pup from the mother plant in 3 steps"
+        onkeydown="if(event.ctrlKey && event.key==='Enter') generate()"></textarea>
+
+      <button class="btn" id="generate-btn" onclick="generate()">Generate Caption</button>
+      <p class="error" id="gen-error"></p>
+
+      <div class="output-section" id="output-section">
+        <div class="divider"></div>
+
+        <div class="output-block">
+          <div class="output-label">Caption</div>
+          <div class="output-text" id="caption-output"></div>
+          <button class="copy-btn" onclick="copyText('caption-output', this)">Copy</button>
+        </div>
+
+        <div class="output-block">
+          <div class="output-label">Hashtags</div>
+          <div class="output-text hashtags-text" id="hashtags-output"></div>
+          <button class="copy-btn" onclick="copyText('hashtags-output', this)">Copy</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ── Session: restore PIN if already entered this session
+    const SESSION_KEY = 'sbx_pin';
+    const savedPin = sessionStorage.getItem(SESSION_KEY);
+    if (savedPin) showMain();
+
+    function submitPin() {
+      const pin = document.getElementById('pin-input').value.trim();
+      if (!pin) return;
+      // We validate the PIN against the backend on first generate.
+      // For now just store it and show the tool.
+      sessionStorage.setItem(SESSION_KEY, pin);
+      showMain();
+    }
+
+    function showMain() {
+      document.getElementById('pin-screen').style.display = 'none';
+      document.getElementById('main-screen').style.display = 'block';
+      document.getElementById('description').focus();
+    }
+
+    function showPin(message) {
+      sessionStorage.removeItem(SESSION_KEY);
+      document.getElementById('main-screen').style.display = 'none';
+      document.getElementById('pin-screen').style.display = 'block';
+      document.getElementById('pin-error').textContent = message || '';
+    }
+
+    async function generate() {
+      const description = document.getElementById('description').value.trim();
+      const pin = sessionStorage.getItem(SESSION_KEY);
+      const btn = document.getElementById('generate-btn');
+      const errEl = document.getElementById('gen-error');
+
+      errEl.textContent = '';
+      if (!description) { errEl.textContent = 'Please enter a video description.'; return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Generating…';
+
+      try {
+        const res = await fetch('/.netlify/functions/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pin, description })
+        });
+
+        const data = await res.json();
+
+        if (res.status === 401) {
+          showPin('Wrong PIN. Try again.');
+          return;
+        }
+
+        if (!res.ok || data.error) {
+          errEl.textContent = data.error || 'Something went wrong. Try again.';
+          return;
+        }
+
+        document.getElementById('caption-output').textContent = data.caption;
+        document.getElementById('hashtags-output').textContent = data.hashtags;
+        document.getElementById('output-section').style.display = 'block';
+
+      } catch (e) {
+        errEl.textContent = 'Network error. Check your connection.';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Generate Caption';
+      }
+    }
+
+    function copyText(id, btn) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
