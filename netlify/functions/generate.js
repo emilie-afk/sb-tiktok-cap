@@ -129,7 +129,8 @@ STYLE RULES (based on 2026 top-performing videos):
 - Caption body: 120–160 characters, no hashtags in the body
 - Include 1–2 emojis placed naturally — not at the very end as a pile
 - Tip or educational angle performs best: "If your X keeps doing Y, here's the fix…"
-- Conversational and warm tone — not corporate
+- Conversational and warm tone, not corporate
+- Do NOT use em dashes (—) anywhere in the caption
 - Do NOT use #fyp
 
 TOP HASHTAGS FROM LIVE 2026 DATA (use 5–7 of these, most relevant to the video):
@@ -170,8 +171,11 @@ HASHTAGS: [5–7 hashtags space-separated]`;
   const captionMatch = text.match(/CAPTION:\s*(.+)/);
   const hashtagsMatch = text.match(/HASHTAGS:\s*(.+)/);
 
+  const caption = (captionMatch ? captionMatch[1].trim() : text.trim())
+    .replace(/—/g, '-');  // strip any em dashes that slip through
+
   return {
-    caption: captionMatch ? captionMatch[1].trim() : text.trim(),
+    caption,
     hashtags: hashtagsMatch ? hashtagsMatch[1].trim() : topHashtags.slice(0, 6).join(' ')
   };
 }
