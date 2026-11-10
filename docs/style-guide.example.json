@@ -1,0 +1,4 @@
+{
+  "version": 1,
+  "template": "FICTIONAL TEMPLATE. Write a short caption.\nHASHTAGS TO CHOOSE FROM:\n{{topHashtags}}\nEXAMPLES:\n{{examples}}\nVIDEO:\n\"{{description}}\"\nReply exactly as:\nCAPTION: [caption]\nHASHTAGS: [hashtags]"
+}

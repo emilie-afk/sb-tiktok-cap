@@ -248,18 +248,37 @@
   </div>
 
   <script>
-    // ── Session: restore PIN if already entered this session
-    const SESSION_KEY = 'sbx_pin';
-    const savedPin = sessionStorage.getItem(SESSION_KEY);
-    if (savedPin) showMain();
+    // ── Session: the PIN is sent once to the server, which sets an expiring,
+    //    HttpOnly session cookie. Nothing secret is stored in the browser.
+    const SESSION_URL = '/.netlify/functions/session';
+    try { sessionStorage.removeItem('sbx_pin'); } catch (e) {}   // clean up older versions
 
-    function submitPin() {
-      const pin = document.getElementById('pin-input').value.trim();
+    (async function restoreSession() {
+      try {
+        const r = await fetch(SESSION_URL, { credentials: 'same-origin' });
+        if (r.ok) showMain();
+      } catch (e) { /* stay on the PIN screen */ }
+    })();
+
+    async function submitPin() {
+      const input = document.getElementById('pin-input');
+      const pin = input.value.trim();
       if (!pin) return;
-      // We validate the PIN against the backend on first generate.
-      // For now just store it and show the tool.
-      sessionStorage.setItem(SESSION_KEY, pin);
-      showMain();
+      try {
+        const r = await fetch(SESSION_URL, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pin })
+        });
+        input.value = '';
+        if (r.status === 401) { showPin('Wrong PIN. Try again.'); return; }
+        if (!r.ok) { showPin('Sign-in is unavailable right now. Try again later.'); return; }
+        document.getElementById('pin-error').textContent = '';
+        showMain();
+      } catch (e) {
+        showPin('Network error. Check your connection.');
+      }
     }
 
     function showMain() {
@@ -269,7 +288,6 @@
     }
 
     function showPin(message) {
-      sessionStorage.removeItem(SESSION_KEY);
       document.getElementById('main-screen').style.display = 'none';
       document.getElementById('pin-screen').style.display = 'block';
       document.getElementById('pin-error').textContent = message || '';
@@ -277,7 +295,6 @@
 
     async function generate() {
       const description = document.getElementById('description').value.trim();
-      const pin = sessionStorage.getItem(SESSION_KEY);
       const btn = document.getElementById('generate-btn');
       const errEl = document.getElementById('gen-error');
 
@@ -290,14 +307,15 @@
       try {
         const res = await fetch('/.netlify/functions/generate', {
           method: 'POST',
+          credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pin, description })
+          body: JSON.stringify({ description })
         });
 
         const data = await res.json();
 
         if (res.status === 401) {
-          showPin('Wrong PIN. Try again.');
+          showPin('Your session ended. Enter the PIN again.');
           return;
         }
 
